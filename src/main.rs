@@ -9,7 +9,6 @@ mod wangdenticon_as_img;
 const MIN_GRID_SIZE: u8 = 2;
 const MAX_GRID_SIZE: u8 = 10;
 const SIZE: usize = 255;
-const JPEG_QUALITY: u8 = 75;
 
 #[derive(Clone, Routable, PartialEq, Eq)]
 enum Route {
@@ -38,37 +37,20 @@ fn switch(routes: &Route) -> Html {
                     min_grid_size={MIN_GRID_SIZE}
                     max_grid_size={MAX_GRID_SIZE}
                     size={SIZE}
-                    jpeg_quality={JPEG_QUALITY}
                 />
             }
         }
-        Route::GenerateImageNameOnly { name } => wangdenticon_as_img::render_wangdenticon_image(
-            name,
-            MIN_GRID_SIZE,
-            false,
-            SIZE,
-            JPEG_QUALITY,
-        ),
+        Route::GenerateImageNameOnly { name } => {
+            wangdenticon_as_img::render_wangdenticon_image(name, MIN_GRID_SIZE, false, SIZE)
+        }
         Route::GenerateImageNameAndGridsize { name, gridsize } => {
-            wangdenticon_as_img::render_wangdenticon_image(
-                name,
-                *gridsize,
-                false,
-                SIZE,
-                JPEG_QUALITY,
-            )
+            wangdenticon_as_img::render_wangdenticon_image(name, *gridsize, false, SIZE)
         }
         Route::GenerateImageAll {
             name,
             gridsize,
             invert,
-        } => wangdenticon_as_img::render_wangdenticon_image(
-            name,
-            *gridsize,
-            *invert,
-            SIZE,
-            JPEG_QUALITY,
-        ),
+        } => wangdenticon_as_img::render_wangdenticon_image(name, *gridsize, *invert, SIZE),
         Route::NotFound => {
             html! {
                 <h1>

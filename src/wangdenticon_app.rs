@@ -8,18 +8,11 @@ pub struct App {
     max_grid_size: u8,
     invert: bool,
     size: usize,
-    jpeg_quality: u8,
 }
 
 impl App {
     fn render_image(&self) -> Html {
-        render_wangdenticon_image(
-            &self.name,
-            self.gridsize,
-            self.invert,
-            self.size,
-            self.jpeg_quality,
-        )
+        render_wangdenticon_image(&self.name, self.gridsize, self.invert, self.size)
     }
 }
 
@@ -34,7 +27,6 @@ pub struct Props {
     pub min_grid_size: u8,
     pub max_grid_size: u8,
     pub size: usize,
-    pub jpeg_quality: u8,
 }
 
 impl Component for App {
@@ -46,7 +38,6 @@ impl Component for App {
             min_grid_size,
             max_grid_size,
             size,
-            jpeg_quality,
         } = ctx.props();
         Self {
             name: "".to_owned(),
@@ -55,7 +46,6 @@ impl Component for App {
             max_grid_size: *max_grid_size,
             invert: false,
             size: *size,
-            jpeg_quality: *jpeg_quality,
         }
     }
 
