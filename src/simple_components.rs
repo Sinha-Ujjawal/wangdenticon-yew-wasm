@@ -1,6 +1,6 @@
 use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
-use yew::{html, Component, Context, Event, Html, InputEvent};
+use yew::{html, Component, Context, Event, Html, InputEvent, KeyboardEvent};
 
 pub fn draw_slider<
     A: 'static + std::fmt::Display + std::str::FromStr + Copy,
@@ -60,6 +60,14 @@ pub fn draw_textbox<C: Component<Message = Msg>, Msg: 'static>(
     placeholder: &'static str,
     mk_event: fn(String) -> Msg,
 ) -> Html {
+    let link = ctx.link();
+    let handle_event = move |e: Event| {
+        let target = e.target();
+        let input = target.and_then(|t| t.dyn_into::<HtmlInputElement>().ok());
+        input.map(move |input| mk_event(input.value()))
+    };
+    let onchange = link.batch_callback(handle_event);
+    let onkeyup = link.batch_callback(move |e: KeyboardEvent| handle_event(e.into()));
     html! {
         <div>
             <div> {label} </div>
@@ -67,11 +75,8 @@ pub fn draw_textbox<C: Component<Message = Msg>, Msg: 'static>(
                 type="textbox"
                 placeholder={placeholder}
                 value={label_value}
-                onchange={ctx.link().batch_callback(move |e: Event| {
-                    let target = e.target();
-                    let input = target.and_then(|t| t.dyn_into::<HtmlInputElement>().ok());
-                    input.map(move |input| mk_event(input.value()))
-                })}
+                onchange={onchange}
+                onkeyup={onkeyup}
             />
         </div>
     }
