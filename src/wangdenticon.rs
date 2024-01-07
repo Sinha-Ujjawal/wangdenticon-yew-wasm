@@ -104,7 +104,12 @@ impl Wangdenticon {
         img_buffer
     }
 
-    fn generate_as(&self, hex_list: &[u8; 16], size: usize, out_fmt: image::ImageOutputFormat) -> Vec<u8> {
+    fn generate_as(
+        &self,
+        hex_list: &[u8; 16],
+        size: usize,
+        out_fmt: image::ImageOutputFormat,
+    ) -> Vec<u8> {
         let img_buffer = self.generate(hex_list);
         let mut buf = vec![];
         image::DynamicImage::ImageRgb8(img_buffer)
