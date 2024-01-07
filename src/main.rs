@@ -41,16 +41,16 @@ fn switch(routes: &Route) -> Html {
             }
         }
         Route::GenerateImageNameOnly { name } => {
-            wangdenticon_as_img::render_wangdenticon_image(name, MIN_GRID_SIZE, false, SIZE)
+            wangdenticon_as_img::render_wangdenticon_image(&md5::compute(name).0, MIN_GRID_SIZE, false, SIZE)
         }
         Route::GenerateImageNameAndGridsize { name, gridsize } => {
-            wangdenticon_as_img::render_wangdenticon_image(name, *gridsize, false, SIZE)
+            wangdenticon_as_img::render_wangdenticon_image(&md5::compute(name).0, *gridsize, false, SIZE)
         }
         Route::GenerateImageAll {
             name,
             gridsize,
             invert,
-        } => wangdenticon_as_img::render_wangdenticon_image(name, *gridsize, *invert, SIZE),
+        } => wangdenticon_as_img::render_wangdenticon_image(&md5::compute(name).0, *gridsize, *invert, SIZE),
         Route::NotFound => {
             html! {
                 <h1>

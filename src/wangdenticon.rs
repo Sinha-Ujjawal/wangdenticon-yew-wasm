@@ -68,8 +68,7 @@ impl Wangdenticon {
         (row as u32 * 3, col as u32 * 3)
     }
 
-    pub fn generate(&self, name: &str) -> image::ImageBuffer<image::Rgb<u8>, Vec<u8>> {
-        let hex_list = md5::compute(name).0;
+    pub fn generate(&self, hex_list: &[u8; 16]) -> image::ImageBuffer<image::Rgb<u8>, Vec<u8>> {
         let hash_color = [hex_list[0], hex_list[1], hex_list[2]];
         let black = [0, 0, 0];
         let middle_tile = Self::MIDDLE_TILES[hex_list[15] as usize % Self::MIDDLE_TILES.len()];
@@ -105,8 +104,8 @@ impl Wangdenticon {
         img_buffer
     }
 
-    fn generate_as(&self, name: &str, size: usize, out_fmt: image::ImageOutputFormat) -> Vec<u8> {
-        let img_buffer = self.generate(name);
+    fn generate_as(&self, hex_list: &[u8; 16], size: usize, out_fmt: image::ImageOutputFormat) -> Vec<u8> {
+        let img_buffer = self.generate(hex_list);
         let mut buf = vec![];
         image::DynamicImage::ImageRgb8(img_buffer)
             .resize(size as u32, size as u32, image::imageops::Nearest)
@@ -115,11 +114,11 @@ impl Wangdenticon {
         buf
     }
 
-    pub fn generate_as_png(&self, name: &str, size: usize) -> Vec<u8> {
-        self.generate_as(name, size, image::ImageOutputFormat::Png)
+    pub fn generate_as_png(&self, hex_list: &[u8; 16], size: usize) -> Vec<u8> {
+        self.generate_as(hex_list, size, image::ImageOutputFormat::Png)
     }
 
-    pub fn generate_as_jpeg(&self, name: &str, size: usize, quality: u8) -> Vec<u8> {
-        self.generate_as(name, size, image::ImageOutputFormat::Jpeg(quality))
+    pub fn generate_as_jpeg(&self, hex_list: &[u8; 16], size: usize, quality: u8) -> Vec<u8> {
+        self.generate_as(hex_list, size, image::ImageOutputFormat::Jpeg(quality))
     }
 }

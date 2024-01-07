@@ -3,6 +3,7 @@ use yew::prelude::{html, Component, Context, Html, Properties};
 
 pub struct App {
     name: String,
+    hex_list: [u8; 16],
     gridsize: u8,
     min_grid_size: u8,
     max_grid_size: u8,
@@ -12,7 +13,7 @@ pub struct App {
 
 impl App {
     fn render_image(&self) -> Html {
-        render_wangdenticon_image(&self.name, self.gridsize, self.invert, self.size)
+        render_wangdenticon_image(&self.hex_list, self.gridsize, self.invert, self.size)
     }
 }
 
@@ -41,6 +42,7 @@ impl Component for App {
         } = ctx.props();
         Self {
             name: "".to_owned(),
+            hex_list: md5::compute("").0,
             gridsize: *min_grid_size,
             min_grid_size: *min_grid_size,
             max_grid_size: *max_grid_size,
@@ -61,6 +63,7 @@ impl Component for App {
             }
             Msg::SetName(name) => {
                 self.name = name;
+                self.hex_list = md5::compute(&self.name).0;
                 true
             }
         }
