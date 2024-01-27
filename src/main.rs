@@ -41,7 +41,7 @@ fn switch(routes: &Route) -> Html {
         }
         Route::GenerateImageNameOnly { name } => {
             let hex_list = md5::compute(name).0;
-            let fgcolor = [hex_list[0], hex_list[1], hex_list[2]];
+            let fgcolor = wangdenticon_app::fgcolor_from_hex_list(&hex_list);
             let bgcolor = [0; 3];
             wangdenticon_app::render_wangdenticon_image(
                 &hex_list,
@@ -53,7 +53,7 @@ fn switch(routes: &Route) -> Html {
         }
         Route::GenerateImageNameAndGridsize { name, gridsize } => {
             let hex_list = md5::compute(name).0;
-            let fgcolor = [hex_list[0], hex_list[1], hex_list[2]];
+            let fgcolor = wangdenticon_app::fgcolor_from_hex_list(&hex_list);
             let bgcolor = [0; 3];
             wangdenticon_app::render_wangdenticon_image(
                 &hex_list, &fgcolor, &bgcolor, *gridsize, SIZE,
@@ -65,7 +65,7 @@ fn switch(routes: &Route) -> Html {
             invert,
         } => {
             let hex_list = md5::compute(name).0;
-            let mut fgcolor = [hex_list[0], hex_list[1], hex_list[2]];
+            let mut fgcolor = wangdenticon_app::fgcolor_from_hex_list(&hex_list);
             let mut bgcolor = [0; 3];
             if *invert {
                 (fgcolor, bgcolor) = (bgcolor, fgcolor);

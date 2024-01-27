@@ -1,3 +1,4 @@
+use gloo_console::log;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
 use yew::{html, Component, Context, Event, Html, InputEvent, KeyboardEvent};
@@ -76,6 +77,75 @@ pub fn draw_textbox<C: Component<Message = Msg>, Msg: 'static>(
                 value={label_value}
                 onchange={onchange}
                 onkeyup={onkeyup}
+            />
+        </div>
+    }
+}
+
+pub fn draw_checkbox<C: Component<Message = Msg>, Msg: 'static>(
+    ctx: &Context<C>,
+    label: &str,
+    is_checked: bool,
+    mk_event: fn() -> Msg,
+) -> Html {
+    html! {
+        <div>
+            <div> {label} </div>
+            <input
+                type="checkbox"
+                oninput={ctx.link().callback(move |_| mk_event())}
+                checked={is_checked}
+            />
+        </div>
+    }
+}
+
+fn rgb_to_hex(color: &[u8; 3]) -> String {
+    let [r, g, b] = color;
+    format!("#{:02x}{:02x}{:02x}", r, g, b)
+}
+
+fn hex_to_rgb(hex_color: &str) -> Result<[u8; 3], core::num::ParseIntError> {
+    let hex_color = hex_color.strip_prefix('#').unwrap_or(hex_color);
+    let hex_value = usize::from_str_radix(hex_color, 16)?;
+    let r = ((hex_value >> 16) & 0xFF) as u8; // Extract the RR byte
+    let g = ((hex_value >> 8) & 0xFF) as u8; // Extract the GG byte
+    let b = ((hex_value) & 0xFF) as u8; // Extract the BB byte
+    Ok([r, g, b])
+}
+
+pub fn draw_color_chooser<C: Component<Message = Msg>, Msg: 'static>(
+    ctx: &Context<C>,
+    label: &str,
+    color: &[u8; 3],
+    mk_event: fn([u8; 3]) -> Msg,
+) -> Html {
+    let link = ctx.link();
+    let handle_event = move |e: Event| {
+        let target = e.target();
+        let input = target.and_then(|t| t.dyn_into::<HtmlInputElement>().ok());
+        input.map(move |input| {
+            let input_value = input.value();
+            let color = hex_to_rgb(&input_value).unwrap_or_else(|err| {
+                log!(
+                    "Could not parse the string ",
+                    input_value,
+                    ": ",
+                    err.to_string()
+                );
+                [0; 3]
+            });
+            mk_event(color)
+        })
+    };
+    let onchange = link.batch_callback(handle_event);
+    html! {
+        <div>
+            <div> {label} </div>
+            <input
+                type="color"
+                value={rgb_to_hex(color)}
+                onchange={onchange}
             />
         </div>
     }

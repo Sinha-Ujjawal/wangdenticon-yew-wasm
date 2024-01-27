@@ -1,16 +1,20 @@
 use crate::{simple_components, wangdenticon};
 use wangdenticon::Wangdenticon;
 use yew::prelude::{html, Component, Context, Html, Properties};
-
 pub struct App {
     name: String,
     hex_list: [u8; 16],
     fgcolor: [u8; 3],
     bgcolor: [u8; 3],
+    override_colors: bool,
     gridsize: u8,
     min_grid_size: u8,
     max_grid_size: u8,
     size: usize,
+}
+
+pub fn fgcolor_from_hex_list(hex_list: &[u8; 16]) -> [u8; 3] {
+    [hex_list[0], hex_list[1], hex_list[2]]
 }
 
 pub fn render_wangdenticon_image(
@@ -28,6 +32,11 @@ pub fn render_wangdenticon_image(
 }
 
 impl App {
+    fn set_default_colors(&mut self) {
+        self.fgcolor = fgcolor_from_hex_list(&self.hex_list);
+        self.bgcolor = [0; 3];
+    }
+
     fn render_image(&self) -> Html {
         render_wangdenticon_image(
             &self.hex_list,
@@ -43,6 +52,9 @@ pub enum Msg {
     SetGridSize(u8),
     Invert,
     SetName(String),
+    SetFGColor([u8; 3]),
+    SetBGColor([u8; 3]),
+    ToggleOverrideColors,
 }
 
 #[derive(PartialEq, Properties, Eq)]
@@ -63,13 +75,14 @@ impl Component for App {
             size,
         } = ctx.props();
         let hex_list = md5::compute("").0;
-        let fgcolor = [hex_list[0], hex_list[1], hex_list[2]];
+        let fgcolor = fgcolor_from_hex_list(&hex_list);
         let bgcolor = [0; 3];
         Self {
             name: "".to_owned(),
             hex_list,
             fgcolor,
             bgcolor,
+            override_colors: false,
             gridsize: *min_grid_size,
             min_grid_size: *min_grid_size,
             max_grid_size: *max_grid_size,
@@ -84,14 +97,35 @@ impl Component for App {
                 true
             }
             Msg::Invert => {
-                (self.fgcolor, self.bgcolor) = (self.bgcolor, self.fgcolor);
+                if self.override_colors {
+                    (self.fgcolor, self.bgcolor) = (self.bgcolor, self.fgcolor);
+                }
                 true
             }
             Msg::SetName(name) => {
                 self.name = name;
                 self.hex_list = md5::compute(&self.name).0;
-                self.fgcolor = [self.hex_list[0], self.hex_list[1], self.hex_list[2]];
-                self.bgcolor = [0; 3];
+                self.override_colors = false;
+                self.set_default_colors();
+                true
+            }
+            Msg::SetFGColor(fgcolor) => {
+                if self.override_colors {
+                    self.fgcolor = fgcolor;
+                }
+                true
+            }
+            Msg::SetBGColor(bgcolor) => {
+                if self.override_colors {
+                    self.bgcolor = bgcolor;
+                }
+                true
+            }
+            Msg::ToggleOverrideColors => {
+                self.override_colors = !self.override_colors;
+                if !self.override_colors {
+                    self.set_default_colors();
+                }
                 true
             }
         }
@@ -102,6 +136,7 @@ impl Component for App {
             <>
             {self.render_image()}
 
+            <div style="padding: 10px">
             {simple_components::draw_textbox(
                 ctx,
                 "Name",
@@ -109,7 +144,9 @@ impl Component for App {
                 "Enter your name here...",
                 Msg::SetName,
             )}
+            </div>
 
+            <div style="padding: 10px">
             {simple_components::draw_slider(
                 ctx,
                 "Grid Size",
@@ -119,12 +156,37 @@ impl Component for App {
                 0,
                 Msg::SetGridSize
             )}
+            </div>
 
+            <div style="padding: 10px">
+            {simple_components::draw_checkbox(
+                ctx,
+                "Override colors?",
+                self.override_colors,
+                || Msg::ToggleOverrideColors,
+            )}
+            {simple_components::draw_color_chooser(
+                ctx,
+                "fgcolor",
+                &self.fgcolor,
+                Msg::SetFGColor,
+            )}
+
+            {simple_components::draw_color_chooser(
+                ctx,
+                "bgcolor",
+                &self.bgcolor,
+                Msg::SetBGColor,
+            )}
+
+            <div style="padding-top: 5px">
             {simple_components::draw_button(
                 ctx,
                 "Invert",
                 || Msg::Invert,
             )}
+            </div>
+            </div>
             </>
         }
     }
