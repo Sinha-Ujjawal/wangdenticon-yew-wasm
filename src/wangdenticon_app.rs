@@ -41,7 +41,7 @@ impl App {
 
 pub enum Msg {
     SetGridSize(u8),
-    ToggleInvert,
+    Invert,
     SetName(String),
 }
 
@@ -83,7 +83,7 @@ impl Component for App {
                 self.gridsize = gridsize;
                 true
             }
-            Msg::ToggleInvert => {
+            Msg::Invert => {
                 (self.fgcolor, self.bgcolor) = (self.bgcolor, self.fgcolor);
                 true
             }
@@ -123,7 +123,7 @@ impl Component for App {
             {simple_components::draw_button(
                 ctx,
                 "Invert",
-                || Msg::ToggleInvert,
+                || Msg::Invert,
             )}
             </>
         }
