@@ -1,12 +1,12 @@
 #[allow(dead_code)]
 pub struct Wangdenticon {
-    pub gridsize: u8,
+    pub gridsize: u32,
 }
 
 #[allow(dead_code)]
 impl Wangdenticon {
     #[allow(dead_code)]
-    pub fn new(gridsize: u8) -> Self {
+    pub fn new(gridsize: u32) -> Self {
         Self { gridsize }
     }
 
@@ -17,7 +17,7 @@ impl Wangdenticon {
         &self,
         tile: u8,
         img_buffer: &mut image::RgbImage,
-        grid_idx: u16,
+        grid_idx: u32,
         fgcolor: &[u8; 3],
         bgcolor: &[u8; 3],
     ) {
@@ -61,10 +61,10 @@ impl Wangdenticon {
         }
     }
 
-    fn cell_index(&self, grid_idx: u16) -> (u32, u32) {
-        let row = grid_idx / (self.gridsize as u16);
-        let col = grid_idx % (self.gridsize as u16);
-        (row as u32 * 3, col as u32 * 3)
+    fn cell_index(&self, grid_idx: u32) -> (u32, u32) {
+        let row = grid_idx / self.gridsize;
+        let col = grid_idx % self.gridsize;
+        (row * 3, col * 3)
     }
 
     pub fn generate(
@@ -74,20 +74,19 @@ impl Wangdenticon {
         bgcolor: &[u8; 3],
     ) -> image::ImageBuffer<image::Rgb<u8>, Vec<u8>> {
         let middle_tile = Self::MIDDLE_TILES[hex_list[15] as usize % Self::MIDDLE_TILES.len()];
-        let width = 3 * (self.gridsize as u32);
+        let width = 3 * self.gridsize;
         let height = width;
         let mut img_buffer = image::RgbImage::new(width, height);
         let xub = (self.gridsize >> 1) + (self.gridsize & 1);
-        for y in 0..(self.gridsize as usize) {
+        for y in 0..self.gridsize {
             for x in 0..xub {
-                let left_idx = (y as u16 * self.gridsize as u16) + x as u16;
-                let right_idx =
-                    y as u16 * self.gridsize as u16 + self.gridsize as u16 - 1 - x as u16;
+                let left_idx = (y * self.gridsize) + x;
+                let right_idx = y * self.gridsize + self.gridsize - 1 - x;
                 if left_idx != right_idx {
-                    let tile = hex_list[(y as u16 * xub as u16 + x as u16) as usize % 15];
+                    let tile = hex_list[((y * xub + x) % 15) as usize];
                     self.render_tile(tile, &mut img_buffer, left_idx, fgcolor, bgcolor);
                     self.render_tile(
-                        Self::OPPOSITE_MAP[tile as usize % Self::OPPOSITE_MAP.len()],
+                        Self::OPPOSITE_MAP[(tile as usize) % Self::OPPOSITE_MAP.len()],
                         &mut img_buffer,
                         right_idx,
                         fgcolor,
@@ -106,13 +105,13 @@ impl Wangdenticon {
         hex_list: &[u8; 16],
         fgcolor: &[u8; 3],
         bgcolor: &[u8; 3],
-        size: usize,
+        size: u32,
         out_fmt: image::ImageOutputFormat,
     ) -> Vec<u8> {
         let img_buffer = self.generate(hex_list, fgcolor, bgcolor);
         let mut buf = vec![];
         image::DynamicImage::ImageRgb8(img_buffer)
-            .resize(size as u32, size as u32, image::imageops::Nearest)
+            .resize(size, size, image::imageops::Nearest)
             .write_to(&mut buf, out_fmt)
             .expect("Writing image as png failed!");
         buf
@@ -123,7 +122,7 @@ impl Wangdenticon {
         hex_list: &[u8; 16],
         fgcolor: &[u8; 3],
         bgcolor: &[u8; 3],
-        size: usize,
+        size: u32,
     ) -> Vec<u8> {
         self.generate_as(
             hex_list,
@@ -139,7 +138,7 @@ impl Wangdenticon {
         hex_list: &[u8; 16],
         fgcolor: &[u8; 3],
         bgcolor: &[u8; 3],
-        size: usize,
+        size: u32,
         quality: u8,
     ) -> Vec<u8> {
         self.generate_as(

@@ -7,10 +7,8 @@ pub struct App {
     fgcolor: [u8; 3],
     bgcolor: [u8; 3],
     override_colors: bool,
-    gridsize: u8,
-    min_grid_size: u8,
-    max_grid_size: u8,
-    size: usize,
+    gridsize: u32,
+    size: u32,
 }
 
 pub fn fgcolor_from_hex_list(hex_list: &[u8; 16]) -> [u8; 3] {
@@ -21,8 +19,8 @@ pub fn render_wangdenticon_image(
     hex_list: &[u8; 16],
     fgcolor: &[u8; 3],
     bgcolor: &[u8; 3],
-    gridsize: u8,
-    size: usize,
+    gridsize: u32,
+    size: u32,
 ) -> Html {
     let image = Wangdenticon::new(gridsize).generate_as_png(hex_list, fgcolor, bgcolor, size);
     let image_base64_encoded = base64::encode(image);
@@ -49,7 +47,7 @@ impl App {
 }
 
 pub enum Msg {
-    SetGridSize(u8),
+    SetGridSize(u32),
     Invert,
     SetName(String),
     SetFGColor([u8; 3]),
@@ -59,9 +57,7 @@ pub enum Msg {
 
 #[derive(PartialEq, Properties, Eq)]
 pub struct Props {
-    pub min_grid_size: u8,
-    pub max_grid_size: u8,
-    pub size: usize,
+    pub size: u32,
 }
 
 impl Component for App {
@@ -69,11 +65,7 @@ impl Component for App {
     type Properties = Props;
 
     fn create(ctx: &Context<Self>) -> Self {
-        let Props {
-            min_grid_size,
-            max_grid_size,
-            size,
-        } = ctx.props();
+        let Props { size } = ctx.props();
         let hex_list = md5::compute("").0;
         let fgcolor = fgcolor_from_hex_list(&hex_list);
         let bgcolor = [0; 3];
@@ -83,9 +75,7 @@ impl Component for App {
             fgcolor,
             bgcolor,
             override_colors: false,
-            gridsize: *min_grid_size,
-            min_grid_size: *min_grid_size,
-            max_grid_size: *max_grid_size,
+            gridsize: 2,
             size: *size,
         }
     }
@@ -152,8 +142,8 @@ impl Component for App {
                 ctx,
                 "Grid Size",
                 self.gridsize,
-                self.min_grid_size,
-                self.max_grid_size,
+                2,
+                1000,
                 0,
                 Msg::SetGridSize,
                 false,
