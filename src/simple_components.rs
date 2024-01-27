@@ -35,20 +35,19 @@ pub fn draw_slider<
     }
 }
 
-pub fn draw_checkbox<C: Component<Message = Msg>, Msg: 'static>(
+pub fn draw_button<C: Component<Message = Msg>, Msg: 'static>(
     ctx: &Context<C>,
     label: &str,
-    is_checked: bool,
     mk_event: fn() -> Msg,
 ) -> Html {
     html! {
         <div>
-            <div> {label} </div>
-            <input
+            <button
                 type="checkbox"
-                oninput={ctx.link().callback(move |_| mk_event())}
-                checked={is_checked}
-            />
+                onclick={ctx.link().callback(move |_| mk_event())}
+            >
+            {label}
+            </button>
         </div>
     }
 }

@@ -1,14 +1,13 @@
 #[allow(dead_code)]
 pub struct Wangdenticon {
     pub gridsize: u8,
-    pub invert: bool,
 }
 
 #[allow(dead_code)]
 impl Wangdenticon {
     #[allow(dead_code)]
-    pub fn new(gridsize: u8, invert: bool) -> Self {
-        Self { gridsize, invert }
+    pub fn new(gridsize: u8) -> Self {
+        Self { gridsize }
     }
 
     const MIDDLE_TILES: &'static [u8] = &[0, 1, 4, 5, 10, 11, 14, 15];
@@ -19,8 +18,8 @@ impl Wangdenticon {
         tile: u8,
         img_buffer: &mut image::RgbImage,
         grid_idx: u16,
-        fgcolor: [u8; 3],
-        bgcolor: [u8; 3],
+        fgcolor: &[u8; 3],
+        bgcolor: &[u8; 3],
     ) {
         let (row, col) = self.cell_index(grid_idx);
         let m = tile % 16;
@@ -33,31 +32,31 @@ impl Wangdenticon {
         // prefill with bgcolor
         for i in 0..3 {
             for j in 0..3 {
-                img_buffer.put_pixel(col + j, row + i, image::Rgb(bgcolor))
+                img_buffer.put_pixel(col + j, row + i, image::Rgb(*bgcolor))
             }
         }
 
         if north == 1 {
             for j in 0..3 {
-                img_buffer.put_pixel(col + j, row, image::Rgb(fgcolor))
+                img_buffer.put_pixel(col + j, row, image::Rgb(*fgcolor))
             }
         }
 
         if east == 2 {
             for i in 0..3 {
-                img_buffer.put_pixel(col + 2, row + i, image::Rgb(fgcolor))
+                img_buffer.put_pixel(col + 2, row + i, image::Rgb(*fgcolor))
             }
         }
 
         if south == 4 {
             for j in 0..3 {
-                img_buffer.put_pixel(col + j, row + 2, image::Rgb(fgcolor))
+                img_buffer.put_pixel(col + j, row + 2, image::Rgb(*fgcolor))
             }
         }
 
         if west == 8 {
             for i in 0..3 {
-                img_buffer.put_pixel(col, row + i, image::Rgb(fgcolor))
+                img_buffer.put_pixel(col, row + i, image::Rgb(*fgcolor))
             }
         }
     }
@@ -68,15 +67,8 @@ impl Wangdenticon {
         (row as u32 * 3, col as u32 * 3)
     }
 
-    pub fn generate(&self, hex_list: &[u8; 16]) -> image::ImageBuffer<image::Rgb<u8>, Vec<u8>> {
-        let hash_color = [hex_list[0], hex_list[1], hex_list[2]];
-        let black = [0, 0, 0];
+    pub fn generate(&self, hex_list: &[u8; 16], fgcolor: &[u8; 3], bgcolor: &[u8; 3]) -> image::ImageBuffer<image::Rgb<u8>, Vec<u8>> {
         let middle_tile = Self::MIDDLE_TILES[hex_list[15] as usize % Self::MIDDLE_TILES.len()];
-        let (fgcolor, bgcolor) = if self.invert {
-            (black, hash_color)
-        } else {
-            (hash_color, black)
-        };
         let width = 3 * (self.gridsize as u32);
         let height = width;
         let mut img_buffer = image::RgbImage::new(width, height);
@@ -107,10 +99,12 @@ impl Wangdenticon {
     fn generate_as(
         &self,
         hex_list: &[u8; 16],
+        fgcolor: &[u8; 3],
+        bgcolor: &[u8; 3],
         size: usize,
         out_fmt: image::ImageOutputFormat,
     ) -> Vec<u8> {
-        let img_buffer = self.generate(hex_list);
+        let img_buffer = self.generate(hex_list, fgcolor, bgcolor);
         let mut buf = vec![];
         image::DynamicImage::ImageRgb8(img_buffer)
             .resize(size as u32, size as u32, image::imageops::Nearest)
@@ -119,11 +113,11 @@ impl Wangdenticon {
         buf
     }
 
-    pub fn generate_as_png(&self, hex_list: &[u8; 16], size: usize) -> Vec<u8> {
-        self.generate_as(hex_list, size, image::ImageOutputFormat::Png)
+    pub fn generate_as_png(&self, hex_list: &[u8; 16], fgcolor: &[u8; 3], bgcolor: &[u8; 3], size: usize) -> Vec<u8> {
+        self.generate_as(hex_list, fgcolor, bgcolor, size, image::ImageOutputFormat::Png)
     }
 
-    pub fn generate_as_jpeg(&self, hex_list: &[u8; 16], size: usize, quality: u8) -> Vec<u8> {
-        self.generate_as(hex_list, size, image::ImageOutputFormat::Jpeg(quality))
+    pub fn generate_as_jpeg(&self, hex_list: &[u8; 16], fgcolor: &[u8; 3], bgcolor: &[u8; 3], size: usize, quality: u8) -> Vec<u8> {
+        self.generate_as(hex_list, fgcolor, bgcolor, size, image::ImageOutputFormat::Jpeg(quality))
     }
 }

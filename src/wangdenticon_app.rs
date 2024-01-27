@@ -1,19 +1,46 @@
-use crate::{simple_components, wangdenticon_as_img::render_wangdenticon_image};
+use crate::{simple_components, wangdenticon};
+use wangdenticon::Wangdenticon;
 use yew::prelude::{html, Component, Context, Html, Properties};
 
 pub struct App {
     name: String,
     hex_list: [u8; 16],
+    fgcolor: [u8; 3],
+    bgcolor: [u8; 3],
     gridsize: u8,
     min_grid_size: u8,
     max_grid_size: u8,
-    invert: bool,
     size: usize,
+}
+
+pub fn render_wangdenticon_image(
+    hex_list: &[u8; 16],
+    fgcolor: &[u8; 3],
+    bgcolor: &[u8; 3],
+    gridsize: u8,
+    size: usize,
+) -> Html {
+    let image = Wangdenticon::new(gridsize).generate_as_png(
+        hex_list,
+        fgcolor,
+        bgcolor,
+        size,
+    );
+    let image_base64_encoded = base64::encode(image);
+    html! {
+        <img alt="Wangdenticon" src={format!("data:image/png;base64,{}", image_base64_encoded)}/>
+    }
 }
 
 impl App {
     fn render_image(&self) -> Html {
-        render_wangdenticon_image(&self.hex_list, self.gridsize, self.invert, self.size)
+        render_wangdenticon_image(
+            &self.hex_list,
+            &self.fgcolor,
+            &self.bgcolor,
+            self.gridsize,
+            self.size,
+        )
     }
 }
 
@@ -40,13 +67,17 @@ impl Component for App {
             max_grid_size,
             size,
         } = ctx.props();
+        let hex_list = md5::compute("").0;
+        let fgcolor = [hex_list[0], hex_list[1], hex_list[2]];
+        let bgcolor = [0; 3];
         Self {
             name: "".to_owned(),
-            hex_list: md5::compute("").0,
+            hex_list,
+            fgcolor,
+            bgcolor,
             gridsize: *min_grid_size,
             min_grid_size: *min_grid_size,
             max_grid_size: *max_grid_size,
-            invert: false,
             size: *size,
         }
     }
@@ -58,12 +89,14 @@ impl Component for App {
                 true
             }
             Msg::ToggleInvert => {
-                self.invert = !self.invert;
+                (self.fgcolor, self.bgcolor) = (self.bgcolor, self.fgcolor);
                 true
             }
             Msg::SetName(name) => {
                 self.name = name;
                 self.hex_list = md5::compute(&self.name).0;
+                self.fgcolor = [self.hex_list[0], self.hex_list[1], self.hex_list[2]];
+                self.bgcolor = [0; 3];
                 true
             }
         }
@@ -92,10 +125,9 @@ impl Component for App {
                 Msg::SetGridSize
             )}
 
-            {simple_components::draw_checkbox(
+            {simple_components::draw_button(
                 ctx,
-                "Invert?",
-                self.invert,
+                "Invert",
                 || Msg::ToggleInvert,
             )}
             </>

@@ -4,7 +4,6 @@ use yew_router::prelude::*;
 mod simple_components;
 mod wangdenticon;
 mod wangdenticon_app;
-mod wangdenticon_as_img;
 
 const MIN_GRID_SIZE: u8 = 2;
 const MAX_GRID_SIZE: u8 = 10;
@@ -40,17 +39,27 @@ fn switch(routes: &Route) -> Html {
                 />
             }
         }
-        Route::GenerateImageNameOnly { name } => wangdenticon_as_img::render_wangdenticon_image(
-            &md5::compute(name).0,
-            MIN_GRID_SIZE,
-            false,
-            SIZE,
-        ),
+        Route::GenerateImageNameOnly { name } => {
+            let hex_list = md5::compute(name).0;
+            let fgcolor = [hex_list[0], hex_list[1], hex_list[2]];
+            let bgcolor = [0; 3];
+            wangdenticon_app::render_wangdenticon_image(
+                &hex_list,
+                &fgcolor,
+                &bgcolor,
+                MIN_GRID_SIZE,
+                SIZE,
+            )
+        },
         Route::GenerateImageNameAndGridsize { name, gridsize } => {
-            wangdenticon_as_img::render_wangdenticon_image(
-                &md5::compute(name).0,
+            let hex_list = md5::compute(name).0;
+            let fgcolor = [hex_list[0], hex_list[1], hex_list[2]];
+            let bgcolor = [0; 3];
+            wangdenticon_app::render_wangdenticon_image(
+                &hex_list,
+                &fgcolor,
+                &bgcolor,
                 *gridsize,
-                false,
                 SIZE,
             )
         }
@@ -58,12 +67,21 @@ fn switch(routes: &Route) -> Html {
             name,
             gridsize,
             invert,
-        } => wangdenticon_as_img::render_wangdenticon_image(
-            &md5::compute(name).0,
-            *gridsize,
-            *invert,
-            SIZE,
-        ),
+        } => {
+            let hex_list = md5::compute(name).0;
+            let mut fgcolor = [hex_list[0], hex_list[1], hex_list[2]];
+            let mut bgcolor = [0; 3];
+            if *invert {
+                (fgcolor, bgcolor) = (bgcolor, fgcolor);
+            }
+            wangdenticon_app::render_wangdenticon_image(
+                &hex_list,
+                &fgcolor,
+                &bgcolor,
+                *gridsize,
+                SIZE,
+            )
+        },
         Route::NotFound => {
             html! {
                 <h1>
