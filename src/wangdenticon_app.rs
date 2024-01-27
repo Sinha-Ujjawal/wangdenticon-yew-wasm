@@ -143,6 +143,7 @@ impl Component for App {
                 self.name.clone(),
                 "Enter your name here...",
                 Msg::SetName,
+                false,
             )}
             </div>
 
@@ -154,7 +155,8 @@ impl Component for App {
                 self.min_grid_size,
                 self.max_grid_size,
                 0,
-                Msg::SetGridSize
+                Msg::SetGridSize,
+                false,
             )}
             </div>
 
@@ -164,12 +166,14 @@ impl Component for App {
                 "Override colors?",
                 self.override_colors,
                 || Msg::ToggleOverrideColors,
+                false,
             )}
             {simple_components::draw_color_chooser(
                 ctx,
                 "fgcolor",
                 &self.fgcolor,
                 Msg::SetFGColor,
+                !self.override_colors,
             )}
 
             {simple_components::draw_color_chooser(
@@ -177,6 +181,7 @@ impl Component for App {
                 "bgcolor",
                 &self.bgcolor,
                 Msg::SetBGColor,
+                !self.override_colors,
             )}
 
             <div style="padding-top: 5px">
@@ -184,6 +189,7 @@ impl Component for App {
                 ctx,
                 "Invert",
                 || Msg::Invert,
+                !self.override_colors,
             )}
             </div>
             </div>

@@ -15,6 +15,7 @@ pub fn draw_slider<
     max: A,
     default: A,
     mk_event: fn(A) -> Msg,
+    disabled: bool,
 ) -> Html {
     html! {
         <div>
@@ -31,6 +32,7 @@ pub fn draw_slider<
                 value={format!("{}", label_value)}
                 min={format!("{}", min)}
                 max={format!("{}", max)}
+                disabled={disabled}
             />
         </div>
     }
@@ -40,12 +42,14 @@ pub fn draw_button<C: Component<Message = Msg>, Msg: 'static>(
     ctx: &Context<C>,
     label: &str,
     mk_event: fn() -> Msg,
+    disabled: bool,
 ) -> Html {
     html! {
         <div>
             <button
                 type="checkbox"
                 onclick={ctx.link().callback(move |_| mk_event())}
+                disabled={disabled}
             >
             {label}
             </button>
@@ -59,6 +63,7 @@ pub fn draw_textbox<C: Component<Message = Msg>, Msg: 'static>(
     label_value: String,
     placeholder: &'static str,
     mk_event: fn(String) -> Msg,
+    disabled: bool,
 ) -> Html {
     let link = ctx.link();
     let handle_event = move |e: Event| {
@@ -77,6 +82,7 @@ pub fn draw_textbox<C: Component<Message = Msg>, Msg: 'static>(
                 value={label_value}
                 onchange={onchange}
                 onkeyup={onkeyup}
+                disabled={disabled}
             />
         </div>
     }
@@ -87,6 +93,7 @@ pub fn draw_checkbox<C: Component<Message = Msg>, Msg: 'static>(
     label: &str,
     is_checked: bool,
     mk_event: fn() -> Msg,
+    disabled: bool,
 ) -> Html {
     html! {
         <div>
@@ -95,6 +102,7 @@ pub fn draw_checkbox<C: Component<Message = Msg>, Msg: 'static>(
                 type="checkbox"
                 oninput={ctx.link().callback(move |_| mk_event())}
                 checked={is_checked}
+                disabled={disabled}
             />
         </div>
     }
@@ -119,6 +127,7 @@ pub fn draw_color_chooser<C: Component<Message = Msg>, Msg: 'static>(
     label: &str,
     color: &[u8; 3],
     mk_event: fn([u8; 3]) -> Msg,
+    disabled: bool,
 ) -> Html {
     let link = ctx.link();
     let handle_event = move |e: Event| {
@@ -146,6 +155,7 @@ pub fn draw_color_chooser<C: Component<Message = Msg>, Msg: 'static>(
                 type="color"
                 value={rgb_to_hex(color)}
                 onchange={onchange}
+                disabled={disabled}
             />
         </div>
     }
