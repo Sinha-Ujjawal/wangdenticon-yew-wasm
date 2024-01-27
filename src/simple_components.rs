@@ -1,4 +1,4 @@
-use gloo_console::log;
+use log::info;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
 use yew::{html, Component, Context, Event, Html, InputEvent, KeyboardEvent};
@@ -137,11 +137,9 @@ pub fn draw_color_chooser<C: Component<Message = Msg>, Msg: 'static>(
         input.map(move |input| {
             let input_value = input.value();
             let color = hex_to_rgb(&input_value).unwrap_or_else(|err| {
-                log!(
-                    "Could not parse the string ",
-                    input_value,
-                    ": ",
-                    err.to_string()
+                info!(
+                    "Could not parse the string {input_value}: {err}",
+                    err = err.to_string()
                 );
                 [0; 3]
             });
