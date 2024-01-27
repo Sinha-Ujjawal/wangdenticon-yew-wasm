@@ -3,6 +3,7 @@ use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
 use yew::{html, Component, Context, Event, Html, InputEvent, KeyboardEvent};
 
+#[allow(clippy::too_many_arguments)]
 pub fn draw_slider<
     A: 'static + std::fmt::Display + std::str::FromStr + Copy,
     C: Component<Message = Msg>,
