@@ -50,17 +50,13 @@ fn switch(routes: &Route) -> Html {
                 MIN_GRID_SIZE,
                 SIZE,
             )
-        },
+        }
         Route::GenerateImageNameAndGridsize { name, gridsize } => {
             let hex_list = md5::compute(name).0;
             let fgcolor = [hex_list[0], hex_list[1], hex_list[2]];
             let bgcolor = [0; 3];
             wangdenticon_app::render_wangdenticon_image(
-                &hex_list,
-                &fgcolor,
-                &bgcolor,
-                *gridsize,
-                SIZE,
+                &hex_list, &fgcolor, &bgcolor, *gridsize, SIZE,
             )
         }
         Route::GenerateImageAll {
@@ -75,13 +71,9 @@ fn switch(routes: &Route) -> Html {
                 (fgcolor, bgcolor) = (bgcolor, fgcolor);
             }
             wangdenticon_app::render_wangdenticon_image(
-                &hex_list,
-                &fgcolor,
-                &bgcolor,
-                *gridsize,
-                SIZE,
+                &hex_list, &fgcolor, &bgcolor, *gridsize, SIZE,
             )
-        },
+        }
         Route::NotFound => {
             html! {
                 <h1>

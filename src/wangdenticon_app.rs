@@ -20,12 +20,7 @@ pub fn render_wangdenticon_image(
     gridsize: u8,
     size: usize,
 ) -> Html {
-    let image = Wangdenticon::new(gridsize).generate_as_png(
-        hex_list,
-        fgcolor,
-        bgcolor,
-        size,
-    );
+    let image = Wangdenticon::new(gridsize).generate_as_png(hex_list, fgcolor, bgcolor, size);
     let image_base64_encoded = base64::encode(image);
     html! {
         <img alt="Wangdenticon" src={format!("data:image/png;base64,{}", image_base64_encoded)}/>
