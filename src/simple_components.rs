@@ -1,43 +1,8 @@
 use log::info;
+use std::str::FromStr;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
-use yew::{html, Component, Context, Event, Html, InputEvent, KeyboardEvent};
-
-#[allow(clippy::too_many_arguments)]
-pub fn draw_slider<
-    A: 'static + std::fmt::Display + std::str::FromStr + Copy,
-    C: Component<Message = Msg>,
-    Msg: 'static,
->(
-    ctx: &Context<C>,
-    label: &str,
-    label_value: A,
-    min: A,
-    max: A,
-    default: A,
-    mk_event: fn(A) -> Msg,
-    disabled: bool,
-) -> Html {
-    html! {
-        <div>
-            <div>
-                { format!("{}: {}", label, label_value) }
-            </div>
-            <input
-                type="range"
-                oninput={ctx.link().batch_callback(move |e: InputEvent| {
-                    let target = e.target();
-                    let input = target.and_then(|t| t.dyn_into::<HtmlInputElement>().ok());
-                    input.map(move |input| mk_event(input.value().parse().unwrap_or(default)))
-                })}
-                value={format!("{}", label_value)}
-                min={format!("{}", min)}
-                max={format!("{}", max)}
-                disabled={disabled}
-            />
-        </div>
-    }
-}
+use yew::{html, Component, Context, Event, Html, KeyboardEvent};
 
 pub fn draw_button<C: Component<Message = Msg>, Msg: 'static>(
     ctx: &Context<C>,
@@ -54,6 +19,46 @@ pub fn draw_button<C: Component<Message = Msg>, Msg: 'static>(
             >
             {label}
             </button>
+        </div>
+    }
+}
+
+pub fn draw_u32_textbox<C: Component<Message = Msg>, Msg: 'static>(
+    ctx: &Context<C>,
+    label: &str,
+    label_value: u32,
+    default: u32,
+    mk_event: fn(u32) -> Msg,
+    disabled: bool,
+) -> Html {
+    let link = ctx.link();
+    let handle_event = move |e: Event| {
+        let target = e.target();
+        let input = target.and_then(|t| t.dyn_into::<HtmlInputElement>().ok());
+        input.map(move |input| {
+            let input_value = input.value();
+            let value = u32::from_str(&input_value).unwrap_or_else(|err| {
+                info!(
+                    "Could not parse the string {input_value}: {err}",
+                    err = err.to_string()
+                );
+                default
+            });
+            mk_event(value)
+        })
+    };
+    let onchange = link.batch_callback(handle_event);
+    let onkeyup = link.batch_callback(move |e: KeyboardEvent| handle_event(e.into()));
+    html! {
+        <div>
+            <div> {label} </div>
+            <input
+                type="textbox"
+                value={format!("{}", label_value)}
+                onchange={onchange}
+                onkeyup={onkeyup}
+                disabled={disabled}
+            />
         </div>
     }
 }

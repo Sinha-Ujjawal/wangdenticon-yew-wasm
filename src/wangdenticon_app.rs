@@ -1,6 +1,9 @@
 use crate::{simple_components, wangdenticon};
 use wangdenticon::Wangdenticon;
 use yew::prelude::{html, Component, Context, Html, Properties};
+
+const MIN_GRID_SIZE: u32 = 2;
+
 pub struct App {
     name: String,
     hex_list: [u8; 16],
@@ -48,6 +51,8 @@ impl App {
 
 pub enum Msg {
     SetGridSize(u32),
+    IncGridSize,
+    DecGridSize,
     Invert,
     SetName(String),
     SetFGColor([u8; 3]),
@@ -83,7 +88,19 @@ impl Component for App {
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::SetGridSize(gridsize) => {
-                self.gridsize = gridsize;
+                if gridsize >= MIN_GRID_SIZE {
+                    self.gridsize = gridsize;
+                }
+                true
+            }
+            Msg::IncGridSize => {
+                self.gridsize += 1;
+                true
+            }
+            Msg::DecGridSize => {
+                if self.gridsize > MIN_GRID_SIZE {
+                    self.gridsize -= 1;
+                }
                 true
             }
             Msg::Invert => {
@@ -138,14 +155,24 @@ impl Component for App {
             </div>
 
             <div style="padding: 10px">
-            {simple_components::draw_slider(
+            {simple_components::draw_u32_textbox(
                 ctx,
                 "Grid Size",
                 self.gridsize,
                 2,
-                1000,
-                0,
                 Msg::SetGridSize,
+                false,
+            )}
+            {simple_components::draw_button(
+                ctx,
+                "^",
+                || Msg::IncGridSize,
+                false,
+            )}
+            {simple_components::draw_button(
+                ctx,
+                "v",
+                || Msg::DecGridSize,
                 false,
             )}
             </div>
